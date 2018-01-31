@@ -24,7 +24,7 @@
 	let Base64 = require('js-base64').Base64;
 	let Sha512 = require('js-sha512');
 	export default {
-		name: 'HelloWorld',
+		name: 'login',
 		data () {
 			return {
 				username: '',

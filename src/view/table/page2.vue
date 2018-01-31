@@ -82,14 +82,56 @@
 		<input v-world v-model="msg">
 		<h3>自定义指令练习</h3>
 		<span v-drag class="aaa">aaa</span>
+		<span v-test>指令练习</span>
+		<h2>过渡</h2>
+		<h3>vue动画本质上还是使用CSS3的transition,animation</h3>
+		<h4>动画对应的有几个钩子函数，分别是动画进去之前，进入，进入之后，</h4>
+		<div>
+			<button @click="flag=!flag">show</button>
+			//动画的钩子函数
+			<transition name="fade"
+			            @before-enter="beforeenter"
+			            @enter="enter"
+			            @after-enter="afterenter"
+			            @before-leave="beforeleave"
+			            @leave="leave"
+			            @after-leave="afterleave"
+			>
+				<p class="donghua" v-show="flag"></p>
+			</transition>
+		</div>
+		<h2>组件</h2>
+		<hello></hello>
+		<hello2></hello2>
+		<h2>引用模板和动态组件</h2>
+		<h3>引用模板：将组件内容方在模板template中</h3>
+		<h3>动态组件</h3>
+		<div>
+			<button @click="showC='hello3'">显示hello3组件</button>
+			<button @click="showC='world'">显示world组件</button>
+		</div>
+		<!--使用keep-alive可以缓存非活动的组件在内存中-->
+		<keep-alive>
+			<component :is="showC"></component>
+		</keep-alive>
+		<h2>组件间数据传递</h2>
+		<h3>1,父子组件 --- 默认子组件无法访问父组件数据，父组件也无法访问子组件数据</h3>
+		<h3>子组件访问父组件数组</h3>
+		父组件通过props向子组件传递数据，子组件通过props接受
+		<hello4 :message="url"></hello4>
+		<hello5 :users="users"></hello5>
+		<h3>父组件访问子组件数据</h3>
+		<div>父组件访问子组件数据，需要子组件$emit发送给父组件,父组件</div>
+		<hello6 @e-hello6="getdata"></hello6>
 	</div>
 </template>
 
 <script>
 	import Vue from 'vue'
 	import axios from 'axios'
+	import hello from '../../components/test'
 	export default {
-		name: 'HelloWorld',
+		name: 'page2',
 		data () {
 			return {
 				text: '',
@@ -107,7 +149,10 @@
 					name: 'jack',
 					id: 1
 				},
-				name: 'jack'
+				name: 'jack',
+				flag: false,
+				showC: 'hello3',
+				childmsg:''
 			}
 		},
 		mounted(){
@@ -142,13 +187,16 @@
 			},
 			drag(el){
 				el.onmousedown = function (e) {
-					var disX = e.clientX-el.offsetLeft;
-					var disY = e.clientY-el.offsetTop;
-					console.log(disX+'--'+disY)
+					var disX = e.clientX - el.offsetLeft;
+					var disY = e.clientY - el.offsetTop;
+					console.log(disX + '--' + disY)
 					document.onmousemove = function (e) {
 						el.style.left = 60 + 'px'
 					}
 				};
+			},
+			test(el){
+				el.style.background = '#ccc'
 			}
 		},
 		computed: {
@@ -232,6 +280,93 @@
 			},
 			changedata(){
 				this.msg = 'vuevue'
+			},
+			beforeenter(){
+				console.log('动画进去之前')
+			},
+			enter(){
+				console.log('动画进入')
+			},
+			afterenter(){
+				console.log('动画进入之后')
+			},
+			beforeleave(){
+				console.log('动画离开之前')
+			},
+			leave(){
+				console.log('动画离开')
+			},
+			afterleave(){
+				console.log('动画离开之后')
+			},
+			getdata(childmsg){
+				alert(childmsg)
+			}
+		},
+		components: {
+			hello: hello,
+			hello2: {
+				template: '<h4>{{msg}}</h4>',
+				data(){
+					return {
+						msg: '局部组件'
+					}
+				}
+			},
+			hello3: {
+				template: '<h4>hello3组件{{x}}</h4>',
+				data(){
+					return {
+						x: Math.random()
+					}
+				}
+			},
+			world: {
+				template: '<h4>world组件{{y}}</h4>',
+				data(){
+					return {
+						y: Math.random()
+					}
+				}
+			},
+			hello4: {
+				template: '<div>{{message}}</div>',
+				data(){
+					return {
+						name: 'jack',
+						age: 12,
+						users: {
+							name: 'tom',
+							age: 14
+						}
+					}
+				},
+				props:['message']
+//				props:{message:String}  可以是数组也可以是对象
+			},
+			hello5:{
+				template:'<div>{{users.name}}===={{users.id}}</div>',
+				props:{
+					users:{
+						type:Object,
+						default(){
+							return {name: 'lily', id: 12}
+						}
+					}
+				}
+			},
+			hello6:{
+				template:'<div><button @click="send">将子组件数据发送给父组件</button></div>',
+				data(){
+					return{
+						childMsg:'vue is good'
+					}
+				},
+				methods:{
+					send(){
+						this.$emit('e-hello6',this.childMsg)
+					}
+				}
 			}
 		}
 	}
@@ -253,5 +388,33 @@
 		width: 50px;
 		height: 50px;
 		background: cornflowerblue;
+	}
+
+	.donghua {
+		width: 200px;
+		height: 200px;
+		background: red;
+	}
+
+	.fade-enter-active, .fade-leave-active {
+		transition: all 3s ease
+	}
+
+	.fade-enter-active {
+		opacity: 1;
+		width: 200px;
+		height: 200px;
+	}
+
+	.fade-leave-active {
+		opacity: 0;
+		width: 200px;
+		height: 0px;
+	}
+
+	.fade-enter {
+		opacity: 0;
+		width: 200px;
+		height: 100px;
 	}
 </style>

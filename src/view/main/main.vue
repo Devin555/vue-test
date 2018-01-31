@@ -24,7 +24,7 @@
 	import AC from '../../API/url'
 	let Sha512 = require('js-sha512');
 	export default {
-		name: 'HelloWorld',
+		name: 'Main',
 		data () {
 			return {
 				msg: 'asd',
