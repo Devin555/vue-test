@@ -116,13 +116,29 @@
 		</keep-alive>
 		<h2>组件间数据传递</h2>
 		<h3>1,父子组件 --- 默认子组件无法访问父组件数据，父组件也无法访问子组件数据</h3>
-		<h3>子组件访问父组件数组</h3>
-		父组件通过props向子组件传递数据，子组件通过props接受
+		<h3>子组件访问父组件数组   props down</h3>
+		父组件通过props向子组件传递数据，子组件通过props接受<br>
+		<input v-model="url">
 		<hello4 :message="url"></hello4>
 		<hello5 :users="users"></hello5>
-		<h3>父组件访问子组件数据</h3>
+		<h3>父组件访问子组件数据  events up</h3>
 		<div>父组件访问子组件数据，需要子组件$emit发送给父组件,父组件</div>
 		<hello6 @e-hello6="getdata"></hello6>
+		<hello7 @e-hello7="getH7D"></hello7>
+		<h2>单向数据流</h2>
+		<div>父组件利用props传递给子组件数据，当父组件数据改变，子组件会改变，但相反子组件数据改变不会改变父组件数据</div>
+		<div>有时有必要子组件改变父组件的数据</div>
+		<hello8 :Ghello8.sync="url"></hello8>
+		<!--<hello8 :user="users"></hello8><input v-model="users.name">-->
+		<h2>非父子组件间通信</h2>
+		<h3>非父子组件间的通信，可以通过创建一个空的vue实例，用它来触发事件和侦听事件</h3>
+		<hello9 @e-hello9="getH9d"></hello9>
+		<hello10 :number000="number000"></hello10>
+		<h2>slot内容分发：作用是用来获取组件中的原内容</h2>
+		<hello11>
+			<span slot="s1">组件中直接写的内容1</span>
+			<span slot="s2">组件中直接写的内容2</span>
+		</hello11>
 	</div>
 </template>
 
@@ -152,7 +168,8 @@
 				name: 'jack',
 				flag: false,
 				showC: 'hello3',
-				childmsg:''
+				childmsg:'',
+				number000:''
 			}
 		},
 		mounted(){
@@ -301,6 +318,13 @@
 			},
 			getdata(childmsg){
 				alert(childmsg)
+			},
+			getH7D(childaa){
+				alert(childaa)
+			},
+			getH9d(number){
+				this.number000 = number
+				console.log(this.number000)
 			}
 		},
 		components: {
@@ -330,7 +354,7 @@
 				}
 			},
 			hello4: {
-				template: '<div>{{message}}</div>',
+				template: '<div>{{message}}<input v-model="message"></div>',
 				data(){
 					return {
 						name: 'jack',
@@ -367,6 +391,56 @@
 						this.$emit('e-hello6',this.childMsg)
 					}
 				}
+			},
+			hello7:{
+				template:'<div><button @click="sendP">向父组件发送数据</button></div>',
+				data(){
+					return{
+						childaa:{
+							name:'lucy',
+							age:20
+						}
+					}
+				},
+				methods:{
+					sendP(){
+						this.$emit('e-hello7',this.childaa)
+					}
+				}
+			},
+			//单向数据流默认情况下父组件数据改变子组件也会改变，默认子组件不会改变父组件数据，但可以同伙.sync和this.$emit('update:Ghello8','aaaaaaaaaaaaa')方法改变
+			hello8:{
+				template:'<div><button @click="sentPP">子组件改变父组件数据</button>{{Ghello8}}</div>',
+				props:['Ghello8','user'],
+				methods:{
+					sentPP(){
+						this.$emit('update:Ghello8','aaaaaaaaaaaaa')
+					}
+//					send2(){
+//						this.user.name = 'lucy'   //因为对象是引用类型
+//					}
+				}
+			},
+			//非父子组件间数据传递
+			hello9:{
+				template:'<div><button @click="senddd">传递数据到父组件然后到非父子组件</button>{{number}}</div>',
+				data(){
+					return{
+						number:120
+					}
+				},
+				methods:{
+					senddd(){
+						this.$emit('e-hello9',this.number)
+					}
+				}
+			},
+			hello10:{
+				template:'<div>获取的非父子组件的数据{{number000}}</div>',
+				props:['number000']
+			},
+			hello11:{
+				template:'<div><slot name="s2"></slot>aaaaaaaaaa<slot name="s1"></slot></div>'
 			}
 		}
 	}
